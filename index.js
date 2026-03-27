@@ -5,10 +5,24 @@ const Exercise = require("./models/exercise");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+/* ---------- CORS ---------- */
+app.use(
+  cors({
+    origin: true, // tillåter alla origins (bra i development)
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  }),
+);
 
-app.use(cors());
 app.use(express.json());
 
+/* ---------- Disable Cache ---------- */
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
+/* ---------- Routes ---------- */
 app.get("/exercises", async (req, res) => {
   try {
     const exercises = await Exercise.find();
@@ -19,17 +33,14 @@ app.get("/exercises", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.send("API is running");
-});
-
+/* ---------- MongoDB + Start Server ---------- */
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect("mongodb+srv://denr0001:denr123@cluster0.nf7gymi.mongodb.net/gymdb")
   .then(() => {
     console.log("Connected to MongoDB Atlas");
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
